@@ -1,21 +1,36 @@
-// Web Audio API sound effects
-const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+// Web Audio API sound effects - lazy initialized
+let audioContext: AudioContext | null = null;
+
+function getAudioContext(): AudioContext | null {
+  if (!audioContext) {
+    try {
+      audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    } catch {
+      console.warn('Web Audio API not supported');
+      return null;
+    }
+  }
+  return audioContext;
+}
 
 function playTone(frequency: number, duration: number, type: OscillatorType = 'sine', volume: number = 0.1) {
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
+  const ctx = getAudioContext();
+  if (!ctx || ctx.state === 'suspended') return;
+
+  const oscillator = ctx.createOscillator();
+  const gainNode = ctx.createGain();
 
   oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
+  gainNode.connect(ctx.destination);
 
   oscillator.frequency.value = frequency;
   oscillator.type = type;
 
-  gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+  gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
 
-  oscillator.start(audioContext.currentTime);
-  oscillator.stop(audioContext.currentTime + duration);
+  oscillator.start(ctx.currentTime);
+  oscillator.stop(ctx.currentTime + duration);
 }
 
 export const sounds = {
@@ -24,9 +39,9 @@ export const sounds = {
   },
 
   success: () => {
-    playTone(523.25, 0.1, 'sine', 0.08); // C5
-    setTimeout(() => playTone(659.25, 0.1, 'sine', 0.08), 100); // E5
-    setTimeout(() => playTone(783.99, 0.15, 'sine', 0.08), 200); // G5
+    playTone(523.25, 0.1, 'sine', 0.08);
+    setTimeout(() => playTone(659.25, 0.1, 'sine', 0.08), 100);
+    setTimeout(() => playTone(783.99, 0.15, 'sine', 0.08), 200);
   },
 
   error: () => {
@@ -63,7 +78,8 @@ export const sounds = {
 
 // Resume audio context on first user interaction (required by browsers)
 export function initAudio() {
-  if (audioContext.state === 'suspended') {
-    audioContext.resume();
+  const ctx = getAudioContext();
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume();
   }
 }
