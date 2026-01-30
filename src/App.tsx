@@ -34,7 +34,7 @@ const TABS = [
 ];
 
 function App() {
-  const [activeTab, setActiveTab] = useState('activity');
+  const [activeTab, setActiveTab] = useState('positions');
   const [pollingEnabled, setPollingEnabled] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -80,17 +80,20 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen animated-bg text-white relative">
+      {/* Aurora background effect */}
+      <div className="fixed inset-0 aurora-bg pointer-events-none" />
+
       <Header />
 
-      <div className="flex">
+      <div className="flex relative">
         {/* Sidebar */}
         <aside
           className={`${
             sidebarCollapsed ? 'w-0 overflow-hidden' : 'w-80'
-          } transition-all duration-300 border-r border-gray-800 bg-gray-900 flex-shrink-0`}
+          } transition-all duration-500 ease-out border-r border-purple-500/20 glass flex-shrink-0`}
         >
-          <div className="p-4 space-y-4 h-[calc(100vh-64px)] overflow-y-auto">
+          <div className="p-4 space-y-4 h-[calc(100vh-73px)] overflow-y-auto">
             <WalletManager
               wallets={wallets}
               onAddWallet={addWallet}
@@ -110,14 +113,17 @@ function App() {
             />
 
             {/* Jupiter Perp Info Box */}
-            <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">
-              <h3 className="text-orange-400 font-semibold mb-2 text-sm">
-                Jupiter Perpetuals Tracking
+            <div className="glass-card rounded-2xl p-5 border-orange-500/20 glow-orange">
+              <h3 className="text-orange-400 font-bold mb-3 text-sm flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Jupiter Perpetuals
               </h3>
-              <p className="text-xs text-gray-300 mb-2">
+              <p className="text-xs text-gray-400 mb-2">
                 Monitoring vault authority:
               </p>
-              <code className="text-xs text-orange-300 bg-gray-800 px-2 py-1 rounded block break-all">
+              <code className="text-xs text-orange-300/80 bg-orange-500/10 px-3 py-2 rounded-lg block break-all font-mono border border-orange-500/20">
                 AVzP2GeRmqGphJsMxWoqjpUifPpCret7LqWhD8NWQK49
               </code>
             </div>
@@ -127,11 +133,11 @@ function App() {
         {/* Sidebar Toggle */}
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800 hover:bg-gray-700 p-1 rounded-r-lg transition-all"
+          className="absolute top-1/2 transform -translate-y-1/2 z-10 glass hover:bg-purple-500/20 p-2 rounded-r-xl transition-all duration-300 border border-purple-500/30 border-l-0"
           style={{ left: sidebarCollapsed ? 0 : '320px' }}
         >
           <svg
-            className={`w-4 h-4 text-gray-400 transition-transform ${sidebarCollapsed ? '' : 'rotate-180'}`}
+            className={`w-4 h-4 text-purple-400 transition-transform duration-300 ${sidebarCollapsed ? '' : 'rotate-180'}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -142,17 +148,13 @@ function App() {
 
         {/* Main Content */}
         <main className="flex-1 min-w-0">
-          <div className="bg-gray-800 border-b border-gray-700">
-            <div className="container mx-auto">
-              <TabNavigation
-                tabs={TABS}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-              />
-            </div>
-          </div>
+          <TabNavigation
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
 
-          <div className="container mx-auto p-6">
+          <div className="p-6">
             {activeTab === 'activity' && (
               <ActivityFeed
                 activities={activities}
